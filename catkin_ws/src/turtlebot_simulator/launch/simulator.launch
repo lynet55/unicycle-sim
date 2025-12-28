@@ -1,0 +1,11 @@
+<launch>
+  <!-- load parameter file -->
+  <rosparam file="$(find turtlebot_simulator)/config/simulator_params.yaml" command="load"/>
+
+  <node pkg="turtlebot_simulator" type="turtlebot_simulator" name="turtlebot_simulator" output="screen"/>
+  
+  <!-- Record rosbag -->
+  <node pkg="rosbag" type="record" name="rosbag_recorder" 
+        args="-o /workspace/rosbags/simulation /turtlebot/state /control_commands /turtlebot/reference"
+        output="screen"/>
+</launch>

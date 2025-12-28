@@ -1,0 +1,5 @@
+# Node example configuration parameters
+  /turtlebot_simulator/run_period: 0.1           # Node execution period
+  /turtlebot_simulator/T_a: 0.050                 # Velocity loops constant
+  /turtlebot_simulator/a: 10.0                 # Velocity loops constant
+  /turtlebot_simulator/dt: 0.01                 # Time step

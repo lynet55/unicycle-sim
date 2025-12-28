@@ -1,0 +1,35 @@
+# ROS/Catkin workspace
+catkin_ws/build/
+catkin_ws/devel/
+catkin_ws/install/
+
+# ROS bag files (recordings can be large)
+*.bag
+*.bag.active
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Docker
+docker-data/bash_history/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated plots (uncomment if you don't want to track them)
+# *.png
+

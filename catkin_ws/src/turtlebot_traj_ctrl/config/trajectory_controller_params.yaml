@@ -1,0 +1,4 @@
+# Trajectory controller configuration parameters
+  /trajectory_controller/run_period: 0.1           # Node execution period
+  /trajectory_controller/a: 10.0           # Trajectory generator amplitude
+  /trajectory_controller/T: 5.0           # Trajectory generator total time
