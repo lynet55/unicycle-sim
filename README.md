@@ -1,5 +1,7 @@
 # Mobile Robots - Build & Run Commands
 
+_Simualtion of a Unicycle model following a 8 shaped trajectory w. PID controller and a timing law._
+
 ## Start Docker Container
 
 ```bash
