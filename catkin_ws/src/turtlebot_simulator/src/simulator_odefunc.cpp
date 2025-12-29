@@ -1,9 +1,22 @@
 #include "simulator/simulator_odefun.hpp"
+#include <string>
+#include <stdexcept>
 
 void UnicycleRobot::simulator_odefunc(const state_type &state, state_type &dxdt, double t) {
     double theta = state[2];
     double v = state[3];
     double omega = state[4];
+
+    // Safety check: Ensure Ts is not zero or invalid
+    if (this->Ts <= 0.0 || std::isnan(this->Ts) || std::isinf(this->Ts)) {
+        // Set all derivatives to zero to prevent NaN propagation
+        dxdt[0] = 0.0;
+        dxdt[1] = 0.0;
+        dxdt[2] = 0.0;
+        dxdt[3] = 0.0;
+        dxdt[4] = 0.0;
+        return;
+    }
 
     // First-order dynamics for velocity: v_dot = (v_cmd - v) / T_a
     // First-order dynamics for angular velocity: omega_dot = (omega_cmd - omega) / T_a

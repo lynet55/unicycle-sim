@@ -1,6 +1,7 @@
 #include "simulator/simulator.hpp"
 #include "simulator/simulator_odefun.hpp"
 #include <vector>
+#include <cmath>
 #include <boost/numeric/odeint.hpp>
 
 
@@ -13,6 +14,8 @@ void simulator::Prepare(void)
 	dt_ = 0.01;  // Default timestep
 	v_cmd = 0.0;
 	omega_cmd = 0.0;
+	a = 10.0;  // Default amplitude
+	T_a = 0.050;  // Default time constant
 
 	/* Retrieve parameters from ROS parameter server */
 	if (Handle.getParam(ros::this_node::getName()+"/run_period", RunPeriod))
@@ -69,6 +72,20 @@ void simulator::Prepare(void)
 	simulator_ptr = new UnicycleRobot(dt_);	
 	simulator_ptr->setInitalState(0.0, 0.0, 0.0, 0.0, 0.0);
 	simulator_ptr->setModelParams(a, T_a);
+	
+	// Verify initialization
+	ROS_INFO("Node %s: Simulator initialized with dt=%.4f, T_a=%.4f, a=%.2f", 
+			ros::this_node::getName().c_str(), dt_, T_a, a);
+	
+	// Safety check for critical parameters
+	if (T_a <= 0.0 || std::isnan(T_a)) {
+		ROS_ERROR("Node %s: CRITICAL - Invalid T_a parameter (%.4f)! This will cause NaN values.", 
+				ros::this_node::getName().c_str(), T_a);
+	}
+	if (dt_ <= 0.0 || std::isnan(dt_)) {
+		ROS_ERROR("Node %s: CRITICAL - Invalid dt parameter (%.4f)! This will cause integration problems.", 
+				ros::this_node::getName().c_str(), dt_);
+	}
 
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
@@ -120,6 +137,7 @@ void simulator::PeriodicTask(void)
 	turtlebot_simulator::TurtlebotState outputMsg;
 	outputMsg.x = x;
 	outputMsg.y = y;
+	outputMsg.theta = theta;
 	outputMsg.w = omega;
 	simulator_publisher.publish(outputMsg);
 

@@ -24,11 +24,22 @@ std::pair<double, double> Trajectory::getPoint(double t, double amplitude) const
 // Generate trajectory with specified number of points
 void Trajectory::generateTrajectory(int numPoints, double amplitude) {
     points.clear();
+    
+    // Safety check for edge cases
+    if (numPoints <= 0) {
+        return;  // Empty trajectory
+    }
+    
     points.reserve(numPoints);
     
-    for (int i = 0; i < numPoints; ++i) {
-        double t = (T * i) / (numPoints - 1);  // Time from 0 to T
-        points.push_back(getPoint(t, amplitude));
+    if (numPoints == 1) {
+        // Special case: single point at t=0
+        points.push_back(getPoint(0.0, amplitude));
+    } else {
+        for (int i = 0; i < numPoints; ++i) {
+            double t = (T * i) / (numPoints - 1);  // Time from 0 to T
+            points.push_back(getPoint(t, amplitude));
+        }
     }
 }
 

@@ -30,6 +30,6 @@ cmake_install.cmake
 .DS_Store
 Thumbs.db
 
-# Generated plots (uncomment if you don't want to track them)
-# *.png
+# Generated plots are now tracked in git
+# (PNG and GIF files are included)
 

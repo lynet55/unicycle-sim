@@ -51,6 +51,7 @@ add_message_files(
   FILES
   ControlCommands.msg
   TurtlebotState.msg
+  ReferencePoint.msg
 )
 
 ## Generate services in the 'srv' folder

@@ -11,7 +11,7 @@
 #include "std_msgs/Float64.h"
 #include "turtlebot_simulator/TurtlebotState.h"
 #include "turtlebot_simulator/ControlCommands.h"
-#include "rosgraph_msgs/Clock.h"
+#include "turtlebot_simulator/ReferencePoint.h"
 #include "trajectory_generator.hpp"
 
  
@@ -24,7 +24,6 @@ class trajectory_controller
     ros::Subscriber controller_subscriber;
     ros::Publisher controller_publisher;
     ros::Publisher reference_publisher;
-    ros::Publisher clock_publisher;
     
     /* Parameters from ROS parameter server */
     // param_type ParamVar;
@@ -42,13 +41,20 @@ class trajectory_controller
     double w;
     double t_prev;  // Previous timestamp for integral control
     double v_feedforward;  // Feedforward velocity
-
-    /*Controller params */
-    double Kp_x = 5.0;
-	  double Kp_y = 5.0;
-	  double Ki_x = 0.1;
-	  double Ki_y = 0.1;
+    double eps;  // Epsilon distance from the trajectory
+    double theta;  // Heading angle
+    double v_xp;  // Velocity in x direction
+    double v_yp;  // Velocity in y direction
+    double v;  // Velocity
+    double omega;  // Angular velocity
+    double x_p;  // Position in x direction
+    double y_p;  // Position in y direction
+    double x_d;  // Desired position in x direction
+    double y_d;  // Desired position in y direction
     
+    /*Controller params */
+    double Kp_x = 3.0;
+	  double Kp_y = 3.0;
     /* Trajectory parameters */
     double T;  // Period
     double a;  // Amplitude

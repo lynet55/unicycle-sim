@@ -1,6 +1,8 @@
 <launch>
   <!-- load parameter file -->
   <rosparam file="$(find turtlebot_simulator)/config/simulator_params.yaml" command="load"/>
+  <!-- Simulator runs on wall clock time since it publishes /clock -->
+  <rosparam param="/use_sim_time">false</rosparam>
 
   <node pkg="turtlebot_simulator" type="turtlebot_simulator" name="turtlebot_simulator" output="screen"/>
   

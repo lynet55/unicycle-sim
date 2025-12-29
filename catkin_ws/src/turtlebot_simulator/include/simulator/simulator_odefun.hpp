@@ -12,7 +12,8 @@ typedef std::vector<double> state_type;
 
 class UnicycleRobot {
 public:
-    UnicycleRobot(double deltaT) : dt(deltaT), t(0.0), state(5), modelParams_set(false) {
+    UnicycleRobot(double deltaT) : dt(deltaT), t(0.0), state(5), modelParams_set(false), 
+                                    v_cmd(0.0), omega_cmd(0.0) {
         /* Initialize state vector */
         state[0] = 0.0; // x position [m]
         state[1] = 0.0; // y position [m]

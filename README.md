@@ -43,6 +43,24 @@ python3 plot_rosbag.py --latest
 
 See [PLOTTING_GUIDE.md](PLOTTING_GUIDE.md) for detailed plotting instructions.
 
+## Simulation Results
+
+### Trajectory Animation
+
+![Robot Trajectory Animation](catkin_ws/rosbags/simulation_2025-12-29-10-19-24_animation.gif)
+
+The animation shows the robot (black circle) following the reference trajectory in real-time.
+
+### Detailed Plots
+
+![Simulation Analysis Plots](catkin_ws/rosbags/simulation_2025-12-29-10-19-24_plots.png)
+
+The plots show:
+- 2D trajectory tracking (actual vs reference)
+- X and Y position tracking over time
+- Angular velocity
+- Linear and angular velocity commands
+
 ## Stop Container
 
 ```bash
