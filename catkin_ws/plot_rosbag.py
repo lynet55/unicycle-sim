@@ -14,9 +14,9 @@ import argparse
 import sys
 
 
-def draw_unicycle_robot(ax, x, y, theta, scale=0.15, color='#2E3440'):
+def draw_unicycle_robot(ax, x, y, theta, scale=0.15, color='black'):
     """
-    Draw a minimalistic unicycle robot with hard edges
+    Draw a simple black circle for the robot
     
     Args:
         ax: matplotlib axes
@@ -30,66 +30,45 @@ def draw_unicycle_robot(ax, x, y, theta, scale=0.15, color='#2E3440'):
     """
     artists = []
     
-    # Robot body as a simple rectangle (box) with hard edges
-    robot_length = scale
-    robot_width = scale * 0.5
-    
-    # Rectangle corners in robot frame
-    corners = np.array([
-        [robot_length/2, robot_width/2],    # Front right
-        [robot_length/2, -robot_width/2],   # Front left
-        [-robot_length/2, -robot_width/2],  # Back left
-        [-robot_length/2, robot_width/2]    # Back right
-    ])
-    
-    # Rotation matrix
-    R = np.array([[np.cos(theta), -np.sin(theta)],
-                  [np.sin(theta), np.cos(theta)]])
-    
-    # Transform to world frame
-    corners_world = (R @ corners.T).T + np.array([x, y])
-    
-    # Draw rectangle (robot body) with hard edges
-    rectangle = Polygon(corners_world, 
-                       closed=True, 
-                       facecolor=color, 
-                       edgecolor='black', 
-                       linewidth=2, 
-                       alpha=1.0,
-                       joinstyle='miter')
-    ax.add_patch(rectangle)
-    artists.append(rectangle)
-    
-    # Draw direction indicator (simple line at front)
-    front_indicator = np.array([
-        [robot_length/2, 0],
-        [robot_length/2 + scale*0.3, 0]
-    ])
-    front_world = (R @ front_indicator.T).T + np.array([x, y])
-    line = plt.Line2D([front_world[0, 0], front_world[1, 0]], 
-                     [front_world[0, 1], front_world[1, 1]], 
-                     color='#BF616A', 
-                     linewidth=3, 
-                     solid_capstyle='butt',
-                     zorder=10)
-    ax.add_line(line)
-    artists.append(line)
+    # Robot body as a simple filled black circle
+    circle = Circle((x, y), radius=scale/2, 
+                   facecolor=color, 
+                   edgecolor='black', 
+                   linewidth=1.5, 
+                   alpha=1.0,
+                   zorder=10)
+    ax.add_patch(circle)
+    artists.append(circle)
     
     return artists
 
 
-def animate_unicycle_trajectory(data, output_file):
+def animate_unicycle_trajectory(data, output_file, kp_x=3.0, kp_y=3.0, ki_x=0.1, ki_y=0.1):
     """
-    Create an animation of the unicycle robot following its trajectory
+    Create a minimalistic animation of the unicycle robot following its trajectory
     
     Args:
         data: dictionary containing state and reference data
         output_file: path to save the animation
+        kp_x: Proportional gain for x-direction (default: 3.0)
+        kp_y: Proportional gain for y-direction (default: 3.0)
+        ki_x: Integral gain for x-direction (default: 0.1)
+        ki_y: Integral gain for y-direction (default: 0.1)
     """
     print("\nCreating animation...")
     
-    # Set up the figure and axis
-    fig, ax = plt.subplots(figsize=(10, 10))
+    # Extract bag ID from filename
+    bag_id = Path(output_file).stem  # e.g., "simulation_2025-12-29-00-41-50"
+    if bag_id.startswith('simulation_'):
+        bag_id = bag_id.replace('simulation_', '')
+    
+    # Use LaTeX rendering
+    plt.rcParams['text.usetex'] = False  # Set to True if LaTeX is installed
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['mathtext.fontset'] = 'cm'  # Computer Modern font (LaTeX-like)
+    
+    # Set up minimalistic figure
+    fig, ax = plt.subplots(figsize=(8, 8))
     
     # Determine plot limits
     x_vals = data['state']['x']
@@ -102,46 +81,79 @@ def animate_unicycle_trajectory(data, output_file):
     ax.set_xlim(x_min - margin, x_max + margin)
     ax.set_ylim(y_min - margin, y_max + margin)
     ax.set_aspect('equal')
-    ax.grid(True, alpha=0.3)
-    ax.set_xlabel('X Position (m)', fontsize=12)
-    ax.set_ylabel('Y Position (m)', fontsize=12)
-    ax.set_title('Unicycle Robot Trajectory Animation', fontsize=14, fontweight='bold')
     
-    # Plot reference trajectory if available
+    # Minimalistic styling - remove borders
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_linewidth(1.5)
+    ax.spines['bottom'].set_linewidth(1.5)
+    ax.spines['left'].set_color('#2E3440')
+    ax.spines['bottom'].set_color('#2E3440')
+    
+    # Grid with minimal style
+    ax.grid(True, alpha=0.15, linewidth=0.5, color='#4C566A', linestyle='-')
+    ax.set_axisbelow(True)
+    
+    # LaTeX-style labels
+    ax.set_xlabel(r'$x$ [m]', fontsize=14, color='#2E3440')
+    ax.set_ylabel(r'$y$ [m]', fontsize=14, color='#2E3440')
+    
+    # Minimal tick styling
+    ax.tick_params(colors='#2E3440', width=1.5, labelsize=11)
+    
+    # Plot reference trajectory if available (minimalistic)
     if len(data['reference']['x']) > 0:
         ax.plot(data['reference']['x'], data['reference']['y'], 
-               'r--', linewidth=2, label='Reference', alpha=0.5, zorder=1)
+               color='#D08770', linewidth=1.5, linestyle='--', 
+               alpha=0.6, zorder=1, label=r'Reference')
     
-    # Plot full actual trajectory (faded)
-    ax.plot(x_vals, y_vals, 'b-', linewidth=1, alpha=0.3, label='Actual Path', zorder=2)
+    # Plot full actual trajectory (very faded)
+    ax.plot(x_vals, y_vals, color='#5E81AC', linewidth=0.8, 
+           alpha=0.2, zorder=2)
     
-    # Initialize trail line
-    trail_line, = ax.plot([], [], 'b-', linewidth=2, alpha=0.8, zorder=3)
+    # Initialize trail line (bold and clean)
+    trail_line, = ax.plot([], [], color='#5E81AC', linewidth=2.5, 
+                         alpha=1.0, zorder=3, solid_capstyle='butt')
     
-    # Text annotations
+    # Minimal time text (no box)
     time_text = ax.text(0.02, 0.98, '', transform=ax.transAxes,
-                       fontsize=12, verticalalignment='top',
-                       bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+                       fontsize=11, verticalalignment='top',
+                       horizontalalignment='left',
+                       color='#2E3440',
+                       family='monospace')
     
-    state_text = ax.text(0.02, 0.88, '', transform=ax.transAxes,
-                        fontsize=10, verticalalignment='top',
-                        bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.8))
+    # Controller gains and bag ID display (upper left)
+    gains_text = (
+        f'Bag: {bag_id}\n'
+        r'$K_{p,x} = $' + f'{kp_x:.1f}\n'
+        r'$K_{p,y} = $' + f'{kp_y:.1f}'
+    )
     
-    ax.legend(loc='upper right', fontsize=10)
+    # Position text on the upper left
+    gains_info_text = ax.text(0.02, 0.93, gains_text, transform=ax.transAxes,
+                              fontsize=9, verticalalignment='top',
+                              horizontalalignment='left',
+                              color='#2E3440',
+                              family='serif',
+                              rotation=0)
+    
+    # Remove legend or make it minimal
+    if len(data['reference']['x']) > 0:
+        ax.legend(loc='upper right', fontsize=10, frameon=False, 
+                 labelcolor='#2E3440')
     
     # Storage for robot artists
     robot_artists = []
     
-    # Downsample data for smoother animation (take every Nth point)
-    skip = max(1, len(x_vals) // 200)  # Aim for ~200 frames
+    # Downsample data for animation - slower (fewer skips)
+    skip = max(1, len(x_vals) // 150)  # Fewer frames for slower animation
     indices = list(range(0, len(x_vals), skip))
     
     def init():
         """Initialize animation"""
         trail_line.set_data([], [])
         time_text.set_text('')
-        state_text.set_text('')
-        return [trail_line, time_text, state_text]
+        return [trail_line, time_text]
     
     def animate(frame_idx):
         """Update animation for each frame"""
@@ -159,24 +171,26 @@ def animate_unicycle_trajectory(data, output_file):
         theta = data['state']['theta'][idx]
         t = data['state']['time'][idx]
         
-        new_artists = draw_unicycle_robot(ax, x, y, theta, scale=0.15, color='blue')
+        new_artists = draw_unicycle_robot(ax, x, y, theta, scale=0.2)
         robot_artists.extend(new_artists)
         
         # Update trail (show path up to current point)
         trail_line.set_data(x_vals[:idx+1], y_vals[:idx+1])
         
-        # Update text
-        time_text.set_text(f'Time: {t:.2f} s')
-        state_text.set_text(f'x: {x:.2f} m\ny: {y:.2f} m\nθ: {np.rad2deg(theta):.1f}°\nω: {data["state"]["w"][idx]:.2f} rad/s')
+        # Update text - minimal
+        time_text.set_text(f't = {t:.2f}s')
         
-        return [trail_line, time_text, state_text] + robot_artists
+        return [trail_line, time_text] + robot_artists
     
-    # Create animation
+    # Create animation with slower speed
     anim = animation.FuncAnimation(
         fig, animate, init_func=init,
-        frames=len(indices), interval=50,  # 50ms between frames = 20 fps
+        frames=len(indices), interval=80,  # 80ms between frames = 12.5 fps (slower)
         blit=False, repeat=True
     )
+    
+    # Tight layout for minimal borders
+    plt.tight_layout()
     
     # Save animation
     if output_file.endswith('.bag'):
@@ -189,7 +203,7 @@ def animate_unicycle_trajectory(data, output_file):
     print("This may take a moment...")
     
     try:
-        anim.save(animation_file, writer='pillow', fps=20, dpi=100)
+        anim.save(animation_file, writer='pillow', fps=12, dpi=100)
         print(f"Animation saved successfully!")
     except Exception as e:
         print(f"Warning: Could not save animation: {e}")
@@ -275,6 +289,11 @@ def plot_rosbag_data(bag_file, create_animation=True):
     print(f"Loaded {len(data['reference']['time'])} reference messages")
     print(f"Loaded {len(data['control']['time'])} control messages")
     
+    # Use LaTeX rendering for all plots
+    plt.rcParams['text.usetex'] = False  # Set to True if LaTeX is installed
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['mathtext.fontset'] = 'cm'  # Computer Modern font (LaTeX-like)
+    
     # Create plots
     fig = plt.figure(figsize=(15, 12))
     
@@ -286,60 +305,60 @@ def plot_rosbag_data(bag_file, create_animation=True):
     if len(data['reference']['x']) > 0:
         ax1.plot(data['reference']['x'], data['reference']['y'], 
                  'r-', linewidth=2, label='Reference Trajectory', alpha=0.7)
-    ax1.set_xlabel('X Position (m)', fontsize=12)
-    ax1.set_ylabel('Y Position (m)', fontsize=12)
+    ax1.set_xlabel(r'$x$ [m]', fontsize=12)
+    ax1.set_ylabel(r'$y$ [m]', fontsize=12)
     ax1.set_title('2D Trajectory: Actual vs Reference', fontsize=14, fontweight='bold')
-    ax1.legend()
+    ax1.legend(frameon=False)
     ax1.grid(True, alpha=0.3)
     ax1.axis('equal')
     cbar = plt.colorbar(ax1.collections[0], ax=ax1)
-    cbar.set_label('Time (s)', fontsize=10)
+    cbar.set_label(r'$t$ [s]', fontsize=10)
     
     # Plot 2: X position vs Time
     ax2 = plt.subplot(3, 2, 2)
     ax2.plot(data['state']['time'], data['state']['x'], 
-             'b-', linewidth=1.5, label='X (actual)', alpha=0.8)
+             'b-', linewidth=1.5, label=r'$x$ (actual)', alpha=0.8)
     if len(data['reference']['x']) > 0:
         ax2.plot(data['reference']['time'], data['reference']['x'], 
-                 'r--', linewidth=2, label='X_ref', alpha=0.7)
-    ax2.set_xlabel('Time (s)', fontsize=12)
-    ax2.set_ylabel('X Position (m)', fontsize=12)
-    ax2.set_title('X Position Tracking', fontsize=14, fontweight='bold')
-    ax2.legend()
+                 'r--', linewidth=2, label=r'$x_{\mathrm{ref}}$', alpha=0.7)
+    ax2.set_xlabel(r'$t$ [s]', fontsize=12)
+    ax2.set_ylabel(r'$x$ [m]', fontsize=12)
+    ax2.set_title(r'$x$ Position Tracking', fontsize=14, fontweight='bold')
+    ax2.legend(frameon=False)
     ax2.grid(True, alpha=0.3)
     
     # Plot 3: Y position vs Time
     ax3 = plt.subplot(3, 2, 3)
     ax3.plot(data['state']['time'], data['state']['y'], 
-             'b-', linewidth=1.5, label='Y (actual)', alpha=0.8)
+             'b-', linewidth=1.5, label=r'$y$ (actual)', alpha=0.8)
     if len(data['reference']['y']) > 0:
         ax3.plot(data['reference']['time'], data['reference']['y'], 
-                 'r--', linewidth=2, label='Y_ref', alpha=0.7)
-    ax3.set_xlabel('Time (s)', fontsize=12)
-    ax3.set_ylabel('Y Position (m)', fontsize=12)
-    ax3.set_title('Y Position Tracking', fontsize=14, fontweight='bold')
-    ax3.legend()
+                 'r--', linewidth=2, label=r'$y_{\mathrm{ref}}$', alpha=0.7)
+    ax3.set_xlabel(r'$t$ [s]', fontsize=12)
+    ax3.set_ylabel(r'$y$ [m]', fontsize=12)
+    ax3.set_title(r'$y$ Position Tracking', fontsize=14, fontweight='bold')
+    ax3.legend(frameon=False)
     ax3.grid(True, alpha=0.3)
     
     # Plot 4: Angular velocity (w) vs Time
     ax4 = plt.subplot(3, 2, 4)
     ax4.plot(data['state']['time'], data['state']['w'], 
-             'c-', linewidth=1.5, label='ω (angular velocity)', alpha=0.8)
-    ax4.set_xlabel('Time (s)', fontsize=12)
-    ax4.set_ylabel('Angular Velocity (rad/s)', fontsize=12)
+             'c-', linewidth=1.5, label=r'$\omega$ (angular velocity)', alpha=0.8)
+    ax4.set_xlabel(r'$t$ [s]', fontsize=12)
+    ax4.set_ylabel(r'$\omega$ [rad/s]', fontsize=12)
     ax4.set_title('Angular Velocity', fontsize=14, fontweight='bold')
-    ax4.legend()
+    ax4.legend(frameon=False)
     ax4.grid(True, alpha=0.3)
     
     # Plot 5: Linear Velocity Command vs Time
     ax5 = plt.subplot(3, 2, 5)
     if len(data['control']['v_cmd']) > 0:
         ax5.plot(data['control']['time'], data['control']['v_cmd'], 
-                 'g-', linewidth=1.5, label='v_cmd (linear)', alpha=0.8)
-        ax5.set_xlabel('Time (s)', fontsize=12)
-        ax5.set_ylabel('Linear Velocity v_cmd (m/s)', fontsize=12)
+                 'g-', linewidth=1.5, label=r'$v_{\mathrm{cmd}}$ (linear)', alpha=0.8)
+        ax5.set_xlabel(r'$t$ [s]', fontsize=12)
+        ax5.set_ylabel(r'$v_{\mathrm{cmd}}$ [m/s]', fontsize=12)
         ax5.set_title('Linear Velocity Command', fontsize=14, fontweight='bold')
-        ax5.legend()
+        ax5.legend(frameon=False)
         ax5.grid(True, alpha=0.3)
     else:
         ax5.text(0.5, 0.5, 'No linear velocity command data', 
@@ -349,11 +368,11 @@ def plot_rosbag_data(bag_file, create_animation=True):
     ax6 = plt.subplot(3, 2, 6)
     if len(data['control']['omega_cmd']) > 0:
         ax6.plot(data['control']['time'], data['control']['omega_cmd'], 
-                 'm-', linewidth=1.5, label='ω_cmd (angular)', alpha=0.8)
-        ax6.set_xlabel('Time (s)', fontsize=12)
-        ax6.set_ylabel('Angular Velocity ω_cmd (rad/s)', fontsize=12)
+                 'm-', linewidth=1.5, label=r'$\omega_{\mathrm{cmd}}$ (angular)', alpha=0.8)
+        ax6.set_xlabel(r'$t$ [s]', fontsize=12)
+        ax6.set_ylabel(r'$\omega_{\mathrm{cmd}}$ [rad/s]', fontsize=12)
         ax6.set_title('Angular Velocity Command', fontsize=14, fontweight='bold')
-        ax6.legend()
+        ax6.legend(frameon=False)
         ax6.grid(True, alpha=0.3)
     else:
         ax6.text(0.5, 0.5, 'No angular velocity command data', 
