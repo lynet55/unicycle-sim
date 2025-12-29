@@ -43,8 +43,6 @@ After running the simulation, plot the recorded data:
 python3 plot_rosbag.py --latest
 ```
 
-See [PLOTTING_GUIDE.md](PLOTTING_GUIDE.md) for detailed plotting instructions.
-
 ## Simulation Results
 
 ### Trajectory Animation
