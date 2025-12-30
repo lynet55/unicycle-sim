@@ -18,16 +18,14 @@ void UnicycleRobot::simulator_odefunc(const state_type &state, state_type &dxdt,
         return;
     }
 
-    // First-order dynamics for velocity: v_dot = (v_cmd - v) / T_a
-    // First-order dynamics for angular velocity: omega_dot = (omega_cmd - omega) / T_a
-    double v_dot = (this->v_cmd - v) / this->Ts;
+    double v_dot = (this->v_cmd - v) / this->Ts; 
     double omega_dot = (this->omega_cmd - omega) / this->Ts;
 
     // Kinematic equations for unicycle model
     dxdt[0] = v * std::cos(theta);  // dx/dt
     dxdt[1] = v * std::sin(theta);  // dy/dt
-    dxdt[2] = omega;                 // dtheta/dt
-    dxdt[3] = v_dot;                 // dv/dt
+    dxdt[2] = omega;                 // dtheta/dt //TODO: is not part of the model, or the message. should be removed.
+    dxdt[3] = v_dot;                 // dv/dt 
     dxdt[4] = omega_dot;             // domega/dt
 }
 

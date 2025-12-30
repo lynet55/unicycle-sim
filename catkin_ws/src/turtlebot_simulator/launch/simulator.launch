@@ -5,6 +5,7 @@
   <rosparam param="/use_sim_time">false</rosparam>
 
   <node pkg="turtlebot_simulator" type="turtlebot_simulator" name="turtlebot_simulator" output="screen"/>
+  <node pkg="turtlebot_simulator" type="test_node" name="test_node" output="screen"/>
   
   <!-- Record rosbag -->
   <node pkg="rosbag" type="record" name="rosbag_recorder" 

@@ -16,17 +16,54 @@ docker exec ros-noetic-workspace bash -c "cd /workspace && source /opt/ros/noeti
 
 ## Run Nodes
 
-### Terminal 1 - Start Simulator
+There are two ways to run the simulation, depending on your use case:
 
+### Setup 1: Manual Control with Test Node
+
+This setup launches the simulator with a test node for manual control via ROS service calls. Use this for testing and manually commanding the robot.
+
+**Single Terminal:**
 ```bash
 docker exec ros-noetic-workspace bash -c "source /workspace/devel/setup.bash && roslaunch turtlebot_simulator simulator.launch"
 ```
 
-### Terminal 2 - Start Trajectory Controller
+This launches:
+- `turtlebot_simulator` - The robot simulator
+- `test_node` - Manual command node (responds to service calls)
+- `rosbag_recorder` - Records simulation data
 
+**To send manual commands:**
+```bash
+# Set velocity command
+rosservice call /add_step "parameter: 'v_cmd'
+step_value: 1.0"
+
+# Set angular velocity command
+rosservice call /add_step "parameter: 'omega_cmd'
+step_value: 0.1"
+```
+
+### Setup 2: Autonomous Trajectory Tracking
+
+This setup runs the simulator with an autonomous trajectory controller that makes the robot follow a figure-8 path.
+
+**Terminal 1 - Start Simulator Only:**
+```bash
+docker exec ros-noetic-workspace bash -c "source /workspace/devel/setup.bash && roslaunch turtlebot_simulator simulator.launch"
+```
+
+**Terminal 2 - Start Trajectory Controller:**
 ```bash
 docker exec ros-noetic-workspace bash -c "source /workspace/devel/setup.bash && roslaunch turtlebot_traj_ctrl trajectory_controller.launch"
 ```
+
+This configuration launches:
+- `turtlebot_simulator` - The robot simulator (Terminal 1)
+- `test_node` - Manual control (Terminal 1, but inactive)
+- `trajectory_controller` - Autonomous trajectory tracking controller (Terminal 2)
+- `rosbag_recorder` - Records simulation data (Terminal 1)
+
+**Note:** Both `test_node` and `trajectory_controller` publish to the same `/control_commands` topic. The trajectory controller will override any manual commands when active.
 
 ## Interactive Shell (Optional)
 

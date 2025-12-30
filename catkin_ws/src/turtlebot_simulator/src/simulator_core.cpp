@@ -9,7 +9,7 @@ int main(int argc, char **argv)
    
   simulator.Prepare();
   
-  simulator.RunPeriodically(simulator.RunPeriod);
+  simulator.RunPeriodically(simulator.dt);
    
   simulator.Shutdown();
   

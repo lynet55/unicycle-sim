@@ -12,7 +12,6 @@
 #include "turtlebot_simulator/TurtlebotState.h"
 #include "turtlebot_simulator/ControlCommands.h"
 #include "turtlebot_simulator/ReferencePoint.h"
-#include "trajectory_generator.hpp"
 
  
 class trajectory_controller
@@ -34,34 +33,47 @@ class trajectory_controller
     /* Node periodic task */
     void PeriodicTask(void);
     void control(void);
+
     
     /* Node state variables */
-    double x;
-    double y;
-    double w;
-    double t_prev;  // Previous timestamp for integral control
-    double v_feedforward;  // Feedforward velocity
-    double eps;  // Epsilon distance from the trajectory
-    double theta;  // Heading angle
-    double v_xp;  // Velocity in x direction
-    double v_yp;  // Velocity in y direction
-    double v;  // Velocity
-    double omega;  // Angular velocity
-    double x_p;  // Position in x direction
-    double y_p;  // Position in y direction
-    double x_d;  // Desired position in x direction
-    double y_d;  // Desired position in y direction
+    double x = 0.0;
+    double y = 0.0;
+    double w = 0.0;
+
+    double eps = 0.2;  // Epsilon distance from the trajectory
+    double theta = 0.0;  // Heading angle
+    double v_xp = 0.0;  // Velocity in x direction
+    double v_yp = 0.0;  // Velocity in y direction
+    double v = 0.0;  // Velocity
+    double omega = 0.0;  // Angular velocity
+ 
+
+    /* Controller parameters */
+    double Tx = 0.1;  // Integral time constant in x direction
+    double Ty = 0.1;  // Integral time constant in y direction
+    double Ts = 0.01;  // Sampling time
+    double Kp_x = 3.0;  // Proportional gain in x direction
+    double Kp_y = 3.0;  // Proportional gain in y direction
+    double v_feedforward = 1.0;  // Feedforward velocity  
+    double w_feedforward = 0.0;  // Feedforward angular velocity
+
+    double error_integral_x = 0.0;  // Integral of the error in x direction
+    double error_integral_y = 0.0;  // Integral of the error in y direction
+    double x_p = 0.0;  // Position in x direction
+    double y_p = 0.0;  // Position in y direction
     
-    /*Controller params */
-    double Kp_x = 3.0;
-	  double Kp_y = 3.0;
     /* Trajectory parameters */
-    double T;  // Period
-    double a;  // Amplitude
-    Trajectory trajectory;  // Trajectory object
+    double T = 10.0;  // Period
+    double a = 1.0;   // Amplitude
     
+    /* Time tracking */
+    double t_start = -1.0;  // Start time (initialized on first control call)
+    
+    /* Anti-windup limits */
+    double integral_limit = 1.0;  // Max absolute value for integral terms
+
   public:
-    double RunPeriod;
+    double dt = RUN_PERIOD_DEFAULT;
     
     void Prepare(void);
     

@@ -7,15 +7,11 @@
 void trajectory_controller::Prepare(void)
 {
 	/* Node variable initialization */
-	RunPeriod = RUN_PERIOD_DEFAULT;
+	dt = RUN_PERIOD_DEFAULT;
 	x = 0.0;
 	y = 0.0;
 	theta = 0.0;
 	w = 0.0;
-	v_feedforward = 1.0;
-	t_prev = ros::Time::now().toSec();
-	T = 10.0;  // Default period
-	a = 1.0;   // Default amplitude
 	
 	// Initialize control variables to avoid NaN
 	v = 0.0;
@@ -24,68 +20,93 @@ void trajectory_controller::Prepare(void)
 	v_yp = 0.0;
 	x_p = 0.0;
 	y_p = 0.0;
-	eps = 0.2;  // Default epsilon value
 
 	/* Retrieve parameters from ROS parameter server */
 	std::string FullParamName;
+	std::string nodeName = ros::this_node::getName();
 	
-	// Get run_period parameter
-	FullParamName = ros::this_node::getName()+"/run_period";
-	if (Handle.getParam(FullParamName, RunPeriod))
-	{
-		ROS_INFO("Node %s: retrieved parameter %s = %.2f", 
-				ros::this_node::getName().c_str(), FullParamName.c_str(), RunPeriod);
-	}
+	// Get run_period parameter (dt)
+	FullParamName = nodeName + "/run_period";
+	if (Handle.getParam(FullParamName, dt))
+		ROS_INFO("Node %s: retrieved parameter run_period = %.3f", nodeName.c_str(), dt);
 	else
-	{
-		ROS_WARN("Node %s: unable to retrieve parameter %s, using default.", 
-				ros::this_node::getName().c_str(), FullParamName.c_str());
-	}
+		ROS_WARN("Node %s: unable to retrieve parameter run_period, using default = %.3f", nodeName.c_str(), dt);
 	
 	// Get trajectory period T
-	FullParamName = ros::this_node::getName()+"/T";
+	FullParamName = nodeName + "/T";
 	if (Handle.getParam(FullParamName, T))
-	{
-		ROS_INFO("Node %s: retrieved parameter T = %.2f", 
-				ros::this_node::getName().c_str(), T);
-	}
+		ROS_INFO("Node %s: retrieved parameter T = %.2f", nodeName.c_str(), T);
 	else
-	{
-		ROS_WARN("Node %s: unable to retrieve parameter T, using default = %.2f", 
-				ros::this_node::getName().c_str(), T);
-	}
+		ROS_WARN("Node %s: unable to retrieve parameter T, using default = %.2f", nodeName.c_str(), T);
 	
 	// Get trajectory amplitude a
-	FullParamName = ros::this_node::getName()+"/a";
+	FullParamName = nodeName + "/a";
 	if (Handle.getParam(FullParamName, a))
-	{
-		ROS_INFO("Node %s: retrieved parameter a = %.2f", 
-				ros::this_node::getName().c_str(), a);
-	}
-	
+		ROS_INFO("Node %s: retrieved parameter a = %.2f", nodeName.c_str(), a);
 	else
-	{
-		ROS_WARN("Node %s: unable to retrieve parameter a, using default = %.2f", 
-				ros::this_node::getName().c_str(), a);
-	}
+		ROS_WARN("Node %s: unable to retrieve parameter a, using default = %.2f", nodeName.c_str(), a);
 	
-	// Generate trajectory after parameters are loaded
-	trajectory = Trajectory(T, a);
-	trajectory.generateTrajectory(100, a);
+	// Get proportional gain Kp_x
+	FullParamName = nodeName + "/Kp_x";
+	if (Handle.getParam(FullParamName, Kp_x))
+		ROS_INFO("Node %s: retrieved parameter Kp_x = %.2f", nodeName.c_str(), Kp_x);
+	else
+		ROS_WARN("Node %s: unable to retrieve parameter Kp_x, using default = %.2f", nodeName.c_str(), Kp_x);
 	
-	// Verify trajectory was generated successfully
-	ROS_INFO("Node %s: Generated trajectory with %zu points (T=%.2f, a=%.2f)", 
-			ros::this_node::getName().c_str(), trajectory.size(), T, a);
-	if (trajectory.size() > 0) {
-		std::pair<double, double> firstPoint = trajectory[0];
-		ROS_INFO("  First point: (%.2f, %.2f)", firstPoint.first, firstPoint.second);
-	}
+	// Get proportional gain Kp_y
+	FullParamName = nodeName + "/Kp_y";
+	if (Handle.getParam(FullParamName, Kp_y))
+		ROS_INFO("Node %s: retrieved parameter Kp_y = %.2f", nodeName.c_str(), Kp_y);
+	else
+		ROS_WARN("Node %s: unable to retrieve parameter Kp_y, using default = %.2f", nodeName.c_str(), Kp_y);
+	
+	// Get integral time constant Tx
+	FullParamName = nodeName + "/Tx";
+	if (Handle.getParam(FullParamName, Tx))
+		ROS_INFO("Node %s: retrieved parameter Tx = %.2f", nodeName.c_str(), Tx);
+	else
+		ROS_WARN("Node %s: unable to retrieve parameter Tx, using default = %.2f", nodeName.c_str(), Tx);
+	
+	// Get integral time constant Ty
+	FullParamName = nodeName + "/Ty";
+	if (Handle.getParam(FullParamName, Ty))
+		ROS_INFO("Node %s: retrieved parameter Ty = %.2f", nodeName.c_str(), Ty);
+	else
+		ROS_WARN("Node %s: unable to retrieve parameter Ty, using default = %.2f", nodeName.c_str(), Ty);
+	
+	// Get sampling time Ts
+	FullParamName = nodeName + "/Ts";
+	if (Handle.getParam(FullParamName, Ts))
+		ROS_INFO("Node %s: retrieved parameter Ts = %.3f", nodeName.c_str(), Ts);
+	else
+		ROS_WARN("Node %s: unable to retrieve parameter Ts, using default = %.3f", nodeName.c_str(), Ts);
+	
+	// Get epsilon distance eps
+	FullParamName = nodeName + "/eps";
+	if (Handle.getParam(FullParamName, eps))
+		ROS_INFO("Node %s: retrieved parameter eps = %.2f", nodeName.c_str(), eps);
+	else
+		ROS_WARN("Node %s: unable to retrieve parameter eps, using default = %.2f", nodeName.c_str(), eps);
+	
+	// Get feedforward velocity
+	FullParamName = nodeName + "/v_feedforward";
+	if (Handle.getParam(FullParamName, v_feedforward))
+		ROS_INFO("Node %s: retrieved parameter v_feedforward = %.2f", nodeName.c_str(), v_feedforward);
+	else
+		ROS_WARN("Node %s: unable to retrieve parameter v_feedforward, using default = %.2f", nodeName.c_str(), v_feedforward);
+	
+	// Get feedforward angular velocity
+	FullParamName = nodeName + "/w_feedforward";
+	if (Handle.getParam(FullParamName, w_feedforward))
+		ROS_INFO("Node %s: retrieved parameter w_feedforward = %.2f", nodeName.c_str(), w_feedforward);
+	else
+		ROS_WARN("Node %s: unable to retrieve parameter w_feedforward, using default = %.2f", nodeName.c_str(), w_feedforward);
 
 	/* ROS topics */
 	controller_subscriber = Handle.subscribe("/turtlebot/state", 1, &trajectory_controller::controller_MessageCallback, this);
 	controller_publisher = Handle.advertise<turtlebot_simulator::ControlCommands>("/control_commands", 1);
 	reference_publisher = Handle.advertise<turtlebot_simulator::ReferencePoint>("/turtlebot/reference", 1);
-	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
+	ROS_INFO("Node %s ready to run.", nodeName.c_str());
 }
 
 
@@ -93,7 +114,7 @@ void trajectory_controller::RunPeriodically(float Period)
 {
 	ros::Rate LoopRate(1.0/Period);
 
-	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0/Period);
+	ROS_INFO("Node %s running periodically (dt=%.3fs, f=%.2fHz).", ros::this_node::getName().c_str(), dt, 1.0/dt);
 
 	while (ros::ok())
 	{
@@ -126,29 +147,7 @@ void trajectory_controller::control(void)
 {
 	/* Put here the code related to the node task */
 	double t = ros::Time::now().toSec();
-	
-	// Get trajectory reference point based on time
-	// Map time to trajectory index: t modulo T, then scale to number of points
-	size_t numPoints = trajectory.size();
-	ROS_INFO("Controller: t=%.2f, numPoints=%zu, x=%.2f, y=%.2f", t, numPoints, x, y);
-	if (numPoints > 0)
-	{
 
-		// double t_normalized = fmod(t, T);  // Get time within one period
-		// size_t index = static_cast<size_t>((t_normalized / T) * numPoints);
-		// index = std::min(index, numPoints - 1);  // Clamp to valid range
-		
-
-		// // Get current trajectory reference position
-		// double x_d = trajectory[index].first;
-		// double y_d = trajectory[index].second;
-
-				
-		// Compute trajectory velocity (feedforward term) using numerical derivative
-		// size_t next_index = (index + 1) % numPoints;  // Wrap around for periodic trajectory
-		// double x_d_next = trajectory[next_index].first;
-		// double y_d_next = trajectory[next_index].second;
-		// double dt = T / numPoints;  // Time step between trajectory points
 
 	double pi = M_PI;
 	double xp_d = a * sin(2 * pi * t / T);
@@ -160,15 +159,19 @@ void trajectory_controller::control(void)
 	x_p = x + eps * cos(theta);
 	y_p = y + eps * sin(theta);
 
-	// Feedback + Feedforward control law
-	v_xp = xpdot_d + Kp_x * (xp_d - x_p);  // Feedforward + feedback
-	v_yp = ypdot_d + Kp_y * (yp_d - y_p);  // Feedforward + feedback
+	// step commmand
+	xp_d = 1.0;
+	yp_d = 1.0;
 
+	double ex = xp_d - x_p;
+	double ey = yp_d - y_p;
+
+	// Feedback + Feedforward control law
+	v_xp = xpdot_d + Kp_x * (ex + (1/Tx) * error_integral_x);
+	v_yp = ypdot_d + Kp_y * (ey + (1/Ty) * error_integral_y);
+	
 	v = v_xp * cos(theta) + v_yp * sin(theta);
 	omega = (v_yp * cos(theta) - v_xp * sin(theta)) / eps;
-
-	ROS_INFO("Controller time: %.2f seconds, velocity_command: %.2f, angular_velocity_command: %.2f", t, v, omega);
-
 
 	/* Publish reference trajectory */
 	turtlebot_simulator::ReferencePoint referenceMsg;
@@ -181,7 +184,7 @@ void trajectory_controller::control(void)
 	control_commands.v_cmd = v;
 	control_commands.omega_cmd = omega;
 	controller_publisher.publish(control_commands);
-	}
+
 }
 
 

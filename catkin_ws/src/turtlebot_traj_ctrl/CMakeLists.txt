@@ -136,7 +136,7 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/turtlebot_traj_ctrl_node.cpp)
-add_executable(trajectory_controller src/trajectory_controller.cpp src/trajectory_controller_core.cpp src/trajectory_generator.cpp)
+add_executable(trajectory_controller src/trajectory_controller.cpp src/trajectory_controller_core.cpp)
 add_executable(ode_system_example src/ode_system_example.cpp)
 
 ## Rename C++ executable without prefix

@@ -1,0 +1,11 @@
+# Request
+string parameter  # Which parameter to step: "v_cmd" or "omega_cmd"
+float64 step_value  # Value to add to the current parameter
+float64 duration  # How long the step lasts in seconds (0 = permanent)
+---
+# Response
+bool success
+string message
+float64 new_value  # The new value after adding the step
+
+    

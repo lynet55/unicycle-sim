@@ -9,7 +9,7 @@ int main(int argc, char **argv)
    
   trajectory_controller_node.Prepare();
   
-  trajectory_controller_node.RunPeriodically(trajectory_controller_node.RunPeriod);
+  trajectory_controller_node.RunPeriodically(trajectory_controller_node.dt);
    
   trajectory_controller_node.Shutdown();
   

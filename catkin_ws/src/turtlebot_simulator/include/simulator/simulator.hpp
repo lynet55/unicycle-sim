@@ -25,7 +25,6 @@ class simulator
     /* Parameters from ROS parameter server */
     double a;
     double T_a;
-    double dt_;
 
     /* ROS topic callbacks */
     void simulator_MessageCallback(const turtlebot_simulator::ControlCommands::ConstPtr& msg);
@@ -39,7 +38,8 @@ class simulator
     double omega_cmd;
 
   public:
-    double RunPeriod;
+    double RunPeriod = RUN_PERIOD_DEFAULT;
+    double dt = 0.01;
     
     void Prepare(void);
     

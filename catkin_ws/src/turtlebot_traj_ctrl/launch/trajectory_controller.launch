@@ -1,7 +1,21 @@
 <launch>
-  <!-- load parameter file -->
+  <!-- Load simulator parameters -->
+  <rosparam file="$(find turtlebot_simulator)/config/simulator_params.yaml" command="load"/>
+  
+  <!-- Load controller parameters -->
   <rosparam file="$(find turtlebot_traj_ctrl)/config/trajectory_controller_params.yaml" command="load"/>
-  <rosparam param="/use_sim_time">true</rosparam>
+  
+  <!-- Use simulation time -->
+  <rosparam param="/use_sim_time">false</rosparam>
+  
+  <!-- Launch simulator node from turtlebot_simulator package -->
+  <node pkg="turtlebot_simulator" type="turtlebot_simulator" name="turtlebot_simulator" output="screen"/>
+  
+  <!-- Launch trajectory controller -->
   <node pkg="turtlebot_traj_ctrl" type="trajectory_controller" name="trajectory_controller" output="screen"/>
+  
+  <!-- Record rosbag -->
+  <node pkg="rosbag" type="record" name="rosbag_recorder" 
+        args="-o /workspace/rosbags/simulation /turtlebot/state /control_commands /turtlebot/reference"
+        output="screen"/>
 </launch>
-
