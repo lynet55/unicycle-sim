@@ -9,7 +9,7 @@
   <rosparam param="/use_sim_time">false</rosparam>
   
   <!-- Launch simulator node from turtlebot_simulator package -->
-  <node pkg="turtlebot_simulator" type="turtlebot_simulator" name="turtlebot_simulator" output="screen"/>
+  <node pkg="turtlebot_simulator" type="turtlebot_simulator" name="turtlebot_simulator" output="screen" required="true"/>
   
   <!-- Launch trajectory controller -->
   <node pkg="turtlebot_traj_ctrl" type="trajectory_controller" name="trajectory_controller" output="screen"/>

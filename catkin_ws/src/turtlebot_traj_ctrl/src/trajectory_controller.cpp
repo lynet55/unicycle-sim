@@ -144,12 +144,18 @@ void trajectory_controller::control(void)
 	x_p = x + eps * cos(theta);
 	y_p = y + eps * sin(theta);
 
+
 	// step commmand
 	xp_d = 1.0;
 	yp_d = 1.0;
+	xpdot_d = 0.0;
+	ypdot_d = 0.0;
 
 	double ex = xp_d - x_p;
 	double ey = yp_d - y_p;
+
+	error_integral_x += ex * dt;
+	error_integral_y += ey * dt;
 
 	// Feedback + Feedforward control law
 	v_xp = xpdot_d + Kp_x * (ex + (1/Tx) * error_integral_x);

@@ -3,6 +3,7 @@ services:
   ros-noetic:
     image: osrf/ros:noetic-desktop-full
     container_name: ros-noetic-workspace
+    init: true
     stdin_open: true
     tty: true
     network_mode: host
