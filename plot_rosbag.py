@@ -289,6 +289,34 @@ def plot_rosbag_data(bag_file, create_animation=True):
     print(f"Loaded {len(data['reference']['time'])} reference messages")
     print(f"Loaded {len(data['control']['time'])} control messages")
     
+    # Create filtered data for plots (limit to 10 seconds)
+    max_plot_time = 40.0
+    plot_data = {
+        'state': {k: [] for k in data['state'].keys()},
+        'reference': {k: [] for k in data['reference'].keys()},
+        'control': {k: [] for k in data['control'].keys()}
+    }
+    
+    # Filter state data
+    for i, t in enumerate(data['state']['time']):
+        if t <= max_plot_time:
+            for k in data['state'].keys():
+                plot_data['state'][k].append(data['state'][k][i])
+    
+    # Filter reference data
+    for i, t in enumerate(data['reference']['time']):
+        if t <= max_plot_time:
+            for k in data['reference'].keys():
+                plot_data['reference'][k].append(data['reference'][k][i])
+    
+    # Filter control data
+    for i, t in enumerate(data['control']['time']):
+        if t <= max_plot_time:
+            for k in data['control'].keys():
+                plot_data['control'][k].append(data['control'][k][i])
+    
+    print(f"Plotting first {max_plot_time}s: {len(plot_data['state']['time'])} state points")
+    
     # Use LaTeX rendering for all plots
     plt.rcParams['text.usetex'] = False  # Set to True if LaTeX is installed
     plt.rcParams['font.family'] = 'serif'
@@ -299,15 +327,15 @@ def plot_rosbag_data(bag_file, create_animation=True):
     
     # Plot 1: X-Y Trajectory (Tracking Plot)
     ax1 = plt.subplot(3, 2, 1)
-    ax1.scatter(data['state']['x'], data['state']['y'], 
-                c=data['state']['time'], cmap='viridis', 
+    ax1.scatter(plot_data['state']['x'], plot_data['state']['y'], 
+                c=plot_data['state']['time'], cmap='viridis', 
                 label='Actual Trajectory', s=10, alpha=0.6)
-    if len(data['reference']['x']) > 0:
-        ax1.plot(data['reference']['x'], data['reference']['y'], 
+    if len(plot_data['reference']['x']) > 0:
+        ax1.plot(plot_data['reference']['x'], plot_data['reference']['y'], 
                  'r-', linewidth=2, label='Reference Trajectory', alpha=0.7)
     ax1.set_xlabel(r'$x$ [m]', fontsize=12)
     ax1.set_ylabel(r'$y$ [m]', fontsize=12)
-    ax1.set_title('2D Trajectory: Actual vs Reference', fontsize=14, fontweight='bold')
+    ax1.set_title(f'2D Trajectory: Actual vs Reference (first {max_plot_time:.0f}s)', fontsize=14, fontweight='bold')
     ax1.legend(frameon=False)
     ax1.grid(True, alpha=0.3)
     ax1.axis('equal')
@@ -316,10 +344,10 @@ def plot_rosbag_data(bag_file, create_animation=True):
     
     # Plot 2: X position vs Time
     ax2 = plt.subplot(3, 2, 2)
-    ax2.plot(data['state']['time'], data['state']['x'], 
+    ax2.plot(plot_data['state']['time'], plot_data['state']['x'], 
              'b-', linewidth=1.5, label=r'$x$ (actual)', alpha=0.8)
-    if len(data['reference']['x']) > 0:
-        ax2.plot(data['reference']['time'], data['reference']['x'], 
+    if len(plot_data['reference']['x']) > 0:
+        ax2.plot(plot_data['reference']['time'], plot_data['reference']['x'], 
                  'r--', linewidth=2, label=r'$x_{\mathrm{ref}}$', alpha=0.7)
     ax2.set_xlabel(r'$t$ [s]', fontsize=12)
     ax2.set_ylabel(r'$x$ [m]', fontsize=12)
@@ -329,10 +357,10 @@ def plot_rosbag_data(bag_file, create_animation=True):
     
     # Plot 3: Y position vs Time
     ax3 = plt.subplot(3, 2, 3)
-    ax3.plot(data['state']['time'], data['state']['y'], 
+    ax3.plot(plot_data['state']['time'], plot_data['state']['y'], 
              'b-', linewidth=1.5, label=r'$y$ (actual)', alpha=0.8)
-    if len(data['reference']['y']) > 0:
-        ax3.plot(data['reference']['time'], data['reference']['y'], 
+    if len(plot_data['reference']['y']) > 0:
+        ax3.plot(plot_data['reference']['time'], plot_data['reference']['y'], 
                  'r--', linewidth=2, label=r'$y_{\mathrm{ref}}$', alpha=0.7)
     ax3.set_xlabel(r'$t$ [s]', fontsize=12)
     ax3.set_ylabel(r'$y$ [m]', fontsize=12)
@@ -342,7 +370,7 @@ def plot_rosbag_data(bag_file, create_animation=True):
     
     # Plot 4: Angular velocity (w) vs Time
     ax4 = plt.subplot(3, 2, 4)
-    ax4.plot(data['state']['time'], data['state']['w'], 
+    ax4.plot(plot_data['state']['time'], plot_data['state']['w'], 
              'c-', linewidth=1.5, label=r'$\omega$ (angular velocity)', alpha=0.8)
     ax4.set_xlabel(r'$t$ [s]', fontsize=12)
     ax4.set_ylabel(r'$\omega$ [rad/s]', fontsize=12)
@@ -352,8 +380,8 @@ def plot_rosbag_data(bag_file, create_animation=True):
     
     # Plot 5: Linear Velocity Command vs Time
     ax5 = plt.subplot(3, 2, 5)
-    if len(data['control']['v_cmd']) > 0:
-        ax5.plot(data['control']['time'], data['control']['v_cmd'], 
+    if len(plot_data['control']['v_cmd']) > 0:
+        ax5.plot(plot_data['control']['time'], plot_data['control']['v_cmd'], 
                  'g-', linewidth=1.5, label=r'$v_{\mathrm{cmd}}$ (linear)', alpha=0.8)
         ax5.set_xlabel(r'$t$ [s]', fontsize=12)
         ax5.set_ylabel(r'$v_{\mathrm{cmd}}$ [m/s]', fontsize=12)
@@ -366,8 +394,8 @@ def plot_rosbag_data(bag_file, create_animation=True):
     
     # Plot 6: Angular Velocity Command vs Time
     ax6 = plt.subplot(3, 2, 6)
-    if len(data['control']['omega_cmd']) > 0:
-        ax6.plot(data['control']['time'], data['control']['omega_cmd'], 
+    if len(plot_data['control']['omega_cmd']) > 0:
+        ax6.plot(plot_data['control']['time'], plot_data['control']['omega_cmd'], 
                  'm-', linewidth=1.5, label=r'$\omega_{\mathrm{cmd}}$ (angular)', alpha=0.8)
         ax6.set_xlabel(r'$t$ [s]', fontsize=12)
         ax6.set_ylabel(r'$\omega_{\mathrm{cmd}}$ [rad/s]', fontsize=12)
@@ -392,22 +420,22 @@ def plot_rosbag_data(bag_file, create_animation=True):
     if create_animation:
         animate_unicycle_trajectory(data, bag_file)
     
-    # Print statistics
+    # Print statistics (for the plotted data, i.e., first 10 seconds)
     print("\n" + "="*60)
-    print("TRACKING STATISTICS")
+    print(f"TRACKING STATISTICS (first {max_plot_time:.0f}s)")
     print("="*60)
     
-    if len(data['reference']['x']) > 0:
+    if len(plot_data['reference']['x']) > 0:
         # Calculate tracking errors (interpolate reference to match state timestamps)
-        ref_x_interp = np.interp(data['state']['time'], 
-                                  data['reference']['time'], 
-                                  data['reference']['x'])
-        ref_y_interp = np.interp(data['state']['time'], 
-                                  data['reference']['time'], 
-                                  data['reference']['y'])
+        ref_x_interp = np.interp(plot_data['state']['time'], 
+                                  plot_data['reference']['time'], 
+                                  plot_data['reference']['x'])
+        ref_y_interp = np.interp(plot_data['state']['time'], 
+                                  plot_data['reference']['time'], 
+                                  plot_data['reference']['y'])
         
-        x_error = np.array(data['state']['x']) - ref_x_interp
-        y_error = np.array(data['state']['y']) - ref_y_interp
+        x_error = np.array(plot_data['state']['x']) - ref_x_interp
+        y_error = np.array(plot_data['state']['y']) - ref_y_interp
         position_error = np.sqrt(x_error**2 + y_error**2)
         
         print(f"X Error - Mean: {np.mean(x_error):.4f} m, "
@@ -419,13 +447,13 @@ def plot_rosbag_data(bag_file, create_animation=True):
         print(f"Position Error - Mean: {np.mean(position_error):.4f} m, "
               f"Max: {np.max(position_error):.4f} m")
     
-    if len(data['control']['v_cmd']) > 0:
-        print(f"\nLinear Velocity (v_cmd) - Mean: {np.mean(data['control']['v_cmd']):.4f} m/s, "
-              f"Range: [{np.min(data['control']['v_cmd']):.4f}, "
-              f"{np.max(data['control']['v_cmd']):.4f}]")
-        print(f"Angular Velocity (ω_cmd) - Mean: {np.mean(data['control']['omega_cmd']):.4f} rad/s, "
-              f"Range: [{np.min(data['control']['omega_cmd']):.4f}, "
-              f"{np.max(data['control']['omega_cmd']):.4f}]")
+    if len(plot_data['control']['v_cmd']) > 0:
+        print(f"\nLinear Velocity (v_cmd) - Mean: {np.mean(plot_data['control']['v_cmd']):.4f} m/s, "
+              f"Range: [{np.min(plot_data['control']['v_cmd']):.4f}, "
+              f"{np.max(plot_data['control']['v_cmd']):.4f}]")
+        print(f"Angular Velocity (ω_cmd) - Mean: {np.mean(plot_data['control']['omega_cmd']):.4f} rad/s, "
+              f"Range: [{np.min(plot_data['control']['omega_cmd']):.4f}, "
+              f"{np.max(plot_data['control']['omega_cmd']):.4f}]")
     
     print("="*60)
 
