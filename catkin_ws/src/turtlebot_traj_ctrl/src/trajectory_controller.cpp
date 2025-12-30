@@ -6,21 +6,6 @@
 
 void trajectory_controller::Prepare(void)
 {
-	/* Node variable initialization */
-	dt = RUN_PERIOD_DEFAULT;
-	x = 0.0;
-	y = 0.0;
-	theta = 0.0;
-	w = 0.0;
-	
-	// Initialize control variables to avoid NaN
-	v = 0.0;
-	omega = 0.0;
-	v_xp = 0.0;
-	v_yp = 0.0;
-	x_p = 0.0;
-	y_p = 0.0;
-
 	/* Retrieve parameters from ROS parameter server */
 	std::string FullParamName;
 	std::string nodeName = ros::this_node::getName();
@@ -114,7 +99,7 @@ void trajectory_controller::RunPeriodically(float Period)
 {
 	ros::Rate LoopRate(1.0/Period);
 
-	ROS_INFO("Node %s running periodically (dt=%.3fs, f=%.2fHz).", ros::this_node::getName().c_str(), dt, 1.0/dt);
+	ROS_INFO("Node %s running periodically (T=%.2fs, f=%.2fHz).", ros::this_node::getName().c_str(), Period, 1.0/Period);
 
 	while (ros::ok())
 	{

@@ -38,10 +38,10 @@ class trajectory_controller
     /* Node state variables */
     double x = 0.0;
     double y = 0.0;
-    double w = 0.0;
+    double theta = 0.0;
+    double w = 0.0; //TODO: This one is should be removed
 
     double eps = 0.2;  // Epsilon distance from the trajectory
-    double theta = 0.0;  // Heading angle
     double v_xp = 0.0;  // Velocity in x direction
     double v_yp = 0.0;  // Velocity in y direction
     double v = 0.0;  // Velocity

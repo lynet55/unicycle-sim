@@ -1,14 +1,14 @@
 # Trajectory controller configuration parameters
-  /trajectory_controller/run_period: 0.1           # Node execution period
+  /trajectory_controller/run_period: 0.01           # Node execution period
 
   /trajectory_controller/Kp_x: 0.8            # Proportional gain in x direction
   /trajectory_controller/Kp_y: 0.8            # Proportional gain in y direction
-  /trajectory_controller/Tx: 0.5            # Integral time constant in x direction (Ki = Kp/Tx = 3)
-  /trajectory_controller/Ty: 0.5             # Integral time constant in y direction (Ki = Kp/Ty = 3)
-  /trajectory_controller/Ts: 0.1            # Sampling time
+  /trajectory_controller/Tx: 1000            # Integral time constant in x direction (Ki = Kp/Tx = 3)
+  /trajectory_controller/Ty: 1000            # Integral time constant in y direction (Ki = Kp/Ty = 3)
+  /trajectory_controller/Ts: 0.01            # Sampling time
 
   /trajectory_controller/eps: 0.2            # Epsilon distance from the trajectory
   /trajectory_controller/v_feedforward: 1.0  # Feedforward velocity
   /trajectory_controller/w_feedforward: 1.0  # Feedforward angular velocity
-  /trajectory_controller/a: 1.0           # Trajectory generator amplitude (1 meter)
-  /trajectory_controller/T: 20.0          # Trajectory generator total time (20 seconds)
+  /trajectory_controller/a: 6.0           # Trajectory generator amplitude (1 meter)
+  /trajectory_controller/T: 6.5          # Trajectory generator total time (20 seconds)

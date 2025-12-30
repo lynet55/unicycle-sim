@@ -143,9 +143,9 @@ I was assigned the following parameters for the Kinematic Unicycle model.
 
 | Parameter                   | Symbol | Value |
 | --------------------------- | ------ | ----- |
-| Extended unicycle parameter | $a$    |       |
-| Time constant               | $T$    |       |
-| Actuator time constant      | $T_a$  |       |
+| Extended unicycle parameter | $a$    | $6.0$ |
+| Time constant               | $T$    | $6.5$ |
+| Actuator time constant      | $T_a$  |$0.060$|
 |                             |        |       |
 
 *Table 4: Extended unicycle model parameters*
