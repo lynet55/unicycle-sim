@@ -21,12 +21,7 @@ class simulator
     ros::Subscriber simulator_subscriber;
     ros::Publisher simulator_publisher;
     ros::Publisher clock_publisher;
-    
-    /* Parameters from ROS parameter server */
-    double a;
-    double T_a;
 
-    /* ROS topic callbacks */
     void simulator_MessageCallback(const turtlebot_simulator::ControlCommands::ConstPtr& msg);
  
     /* Node periodic task */
@@ -34,12 +29,26 @@ class simulator
     
     /* Node state variables */
     UnicycleRobot* simulator_ptr;
-    double v_cmd;
-    double omega_cmd;
 
   public:
     double RunPeriod = RUN_PERIOD_DEFAULT;
     double dt = 0.01;
+
+    double a = 6.0; 
+    double T_a = 0.060;
+
+    double x = 0.0;
+    double y = 0.0;
+    double x_p = 0.0;
+    double y_p = 0.0;
+    double theta = 0.0;
+    double v = 0.0;
+    double omega = 0.0;
+
+    double v_cmd = 0.0;
+    double omega_cmd = 0.0;
+
+    double eps = 0.2;
     
     void Prepare(void);
     

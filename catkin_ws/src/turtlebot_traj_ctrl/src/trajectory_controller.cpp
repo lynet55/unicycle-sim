@@ -122,10 +122,10 @@ void trajectory_controller::Shutdown(void)
 void trajectory_controller::controller_MessageCallback(const turtlebot_simulator::TurtlebotState::ConstPtr& msg)
 {
 	/* Receive data from the topic */
-	x = msg->x;
-	y = msg->y;
-	theta = msg->theta;
-	w = msg->w;
+	x_p = msg->x; // Control point
+	y_p = msg->y; // Control point
+	theta = msg->theta; // Heading angle
+	w = msg->w; // Angular velocity
 }
 
 void trajectory_controller::control(void)
@@ -139,11 +139,6 @@ void trajectory_controller::control(void)
 	double yp_d = a * sin(2 * pi * t / T) * cos(2 * pi * t / T);
 	double xpdot_d = a * 2 * pi / T * cos(2 * pi * t / T);
 	double ypdot_d = a * (2 * pi / T) * cos(4 * pi * t / T);
-
-	// Control point ahead of robot
-	x_p = x + eps * cos(theta);
-	y_p = y + eps * sin(theta);
-
 
 	// step commmand
 	xp_d = 1.0;

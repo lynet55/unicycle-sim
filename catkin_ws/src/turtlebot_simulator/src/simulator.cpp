@@ -13,8 +13,7 @@ void simulator::Prepare(void)
 
 	v_cmd = 0.0;
 	omega_cmd = 0.0;
-	a = 10.0;  // Default amplitude
-	T_a = 0.050;  // Default time constant
+
 
 	/* Retrieve parameters from ROS parameter server */
 	if (Handle.getParam(ros::this_node::getName()+"/run_period", RunPeriod))
@@ -61,7 +60,16 @@ void simulator::Prepare(void)
 				ros::this_node::getName().c_str(), dt);
 	}
 
-
+	if (Handle.getParam(ros::this_node::getName()+"/eps", eps))
+	{
+		ROS_INFO("Node %s: retrieved parameter eps = %.2f", 
+				ros::this_node::getName().c_str(), eps);
+	}
+	else
+	{
+		ROS_WARN("Node %s: unable to retrieve parameter eps, using default = %.2f", 
+				ros::this_node::getName().c_str(), eps);
+	}
 	/* ROS topics */
 	simulator_subscriber = Handle.subscribe("/control_commands", 1, &simulator::simulator_MessageCallback, this);
 	simulator_publisher = Handle.advertise<turtlebot_simulator::TurtlebotState>("/turtlebot/state", 1);
@@ -128,14 +136,15 @@ void simulator::PeriodicTask(void)
 	double time;
 	simulator_ptr->getTime(time);
 	ROS_INFO("Simulator time: %.2f seconds, v_cmd: %.2f, omega_cmd: %.2f", time, v_cmd, omega_cmd);
-
-	/* Publish turtlebot state */
-	double x, y, theta, v, omega;
 	simulator_ptr->getState(x, y, theta, v, omega);
 	
+	/* Compute control point */
+	x_p = x + eps * cos(theta);
+	y_p = y + eps * sin(theta);
+
 	turtlebot_simulator::TurtlebotState outputMsg;
-	outputMsg.x = x;
-	outputMsg.y = y;
+	outputMsg.x = x_p;
+	outputMsg.y = y_p;
 	outputMsg.theta = theta;
 	outputMsg.w = omega;
 	simulator_publisher.publish(outputMsg);
