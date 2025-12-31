@@ -38,17 +38,6 @@ void simulator::Prepare(void)
 				ros::this_node::getName().c_str(), T_a);
 	}
 
-	if (Handle.getParam(ros::this_node::getName()+"/a", a))
-	{
-		ROS_INFO("Node %s: retrieved parameter a = %.2f", 
-				ros::this_node::getName().c_str(), a);
-	}
-	else
-	{
-		ROS_WARN("Node %s: unable to retrieve parameter a, using default = %.2f", 
-				ros::this_node::getName().c_str(), a);
-	}
-
 	if (Handle.getParam(ros::this_node::getName()+"/dt", dt))
 	{
 		ROS_INFO("Node %s: retrieved parameter dt = %.2f", 
@@ -78,22 +67,11 @@ void simulator::Prepare(void)
 	/* Node variable initialization */
 	simulator_ptr = new UnicycleRobot(dt);	
 	simulator_ptr->setInitalState(0.0, 0.0, 0.0, 0.0, 0.0);
-	simulator_ptr->setModelParams(a, T_a);
+	simulator_ptr->setModelParams(T_a);
 	
 	// Verify initialization
-	ROS_INFO("Node %s: Simulator initialized with dt=%.4f, T_a=%.4f, a=%.2f", 
-			ros::this_node::getName().c_str(), dt, T_a, a);
-	
-	// Safety check for critical parameters
-	if (T_a <= 0.0 || std::isnan(T_a)) {
-		ROS_ERROR("Node %s: CRITICAL - Invalid T_a parameter (%.4f)! This will cause NaN values.", 
-				ros::this_node::getName().c_str(), T_a);
-	}
-	if (dt <= 0.0 || std::isnan(dt)) {
-		ROS_ERROR("Node %s: CRITICAL - Invalid dt parameter (%.4f)! This will cause integration problems.", 
-				ros::this_node::getName().c_str(), dt);
-	}
-
+	ROS_INFO("Node %s: Simulator initialized with dt=%.4f, T_a=%.4f", 
+			ros::this_node::getName().c_str(), dt, T_a);
 	ROS_INFO("Node %s ready to run.", ros::this_node::getName().c_str());
 }
 

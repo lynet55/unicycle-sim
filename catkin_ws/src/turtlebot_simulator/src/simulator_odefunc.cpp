@@ -7,19 +7,9 @@ void UnicycleRobot::simulator_odefunc(const state_type &state, state_type &dxdt,
     double v = state[3];
     double omega = state[4];
 
-    // Safety check: Ensure Ts is not zero or invalid
-    if (this->Ts <= 0.0 || std::isnan(this->Ts) || std::isinf(this->Ts)) {
-        // Set all derivatives to zero to prevent NaN propagation
-        dxdt[0] = 0.0;
-        dxdt[1] = 0.0;
-        dxdt[2] = 0.0;
-        dxdt[3] = 0.0;
-        dxdt[4] = 0.0;
-        return;
-    }
 
-    double v_dot = (this->v_cmd - v) / this->Ts; 
-    double omega_dot = (this->omega_cmd - omega) / this->Ts;
+    double v_dot = (this->v_cmd - v) / this->Ta; 
+    double omega_dot = (this->omega_cmd - omega) / this->Ta;
 
     // Kinematic equations for unicycle model
     dxdt[0] = v * std::cos(theta);  // dx/dt

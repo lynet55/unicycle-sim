@@ -30,9 +30,8 @@ public:
         state[4] = w_init;
     }
 
-    void setModelParams(double a, double Ts) {
-        this->a = a;
-        this->Ts = Ts;
+    void setModelParams(double Ta) {
+        this->Ta = Ta;
         this->modelParams_set = true;
     }
 
@@ -57,7 +56,7 @@ public:
 
 private:
     double t, dt; // simulation parameters
-    double a, Ts; // model parameters
+    double Ta; // velocity loops constant
     double v_cmd, omega_cmd; // input values
 
     bool modelParams_set;
